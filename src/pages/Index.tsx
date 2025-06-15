@@ -10,6 +10,7 @@ import FlavorWheel from "@/components/FlavorWheel";
 import TeaCollection from "@/components/TeaCollection";
 import BrewingHistory from "@/components/BrewingHistory";
 import OnboardingTour from "@/components/OnboardingTour";
+import BottomNav from "@/components/BottomNav";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -97,9 +98,9 @@ const Index = () => {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 pb-24 md:pb-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-white/60 backdrop-blur-sm border border-amber-200">
+          <TabsList className="hidden md:grid w-full grid-cols-4 bg-white/60 backdrop-blur-sm border-amber-200">
             <TabsTrigger value="dashboard" className="data-[state=active]:bg-amber-100">
               <BarChart3 className="w-4 h-4 mr-2" />
               儀表板
@@ -247,6 +248,8 @@ const Index = () => {
       {showOnboarding && (
         <OnboardingTour onClose={() => setShowOnboarding(false)} />
       )}
+
+      <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
     </div>
   );
 };
