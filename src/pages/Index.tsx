@@ -11,53 +11,176 @@ import TeaCollection from "@/components/TeaCollection";
 import BrewingHistory from "@/components/BrewingHistory";
 import OnboardingTour from "@/components/OnboardingTour";
 import BottomNav from "@/components/BottomNav";
+import { Tea, RecentTea, TeaRecord } from "@/types/tea";
+
+const initialRecentTeas: RecentTea[] = [
+  {
+    id: 1,
+    name: "大益7542",
+    type: "普洱生茶",
+    origin: "云南勐海",
+    year: "2018",
+    rating: 4.5,
+    brewCount: 8,
+    lastBrewed: "2024-06-14",
+    flavorProfile: ["甘甜", "回甘", "微苦"]
+  },
+  {
+    id: 2,
+    name: "铁观音",
+    type: "乌龙茶",
+    origin: "福建安溪",
+    year: "2023",
+    rating: 4.2,
+    brewCount: 5,
+    lastBrewed: "2024-06-13",
+    flavorProfile: ["花香", "清香", "甘醇"]
+  },
+  {
+    id: 3,
+    name: "正山小种",
+    type: "红茶",
+    origin: "福建武夷山",
+    year: "2023",
+    rating: 4.7,
+    brewCount: 12,
+    lastBrewed: "2024-06-12",
+    flavorProfile: ["烟熏", "蜜香", "醇厚"]
+  }
+];
+
+const initialTeaCollection: Tea[] = [
+    {
+      id: 1,
+      name: "大益7542",
+      type: "普洱生茶",
+      origin: "雲南勐海",
+      year: 2018,
+      rating: 4.5,
+      brewCount: 8,
+      dateAdded: "2024-01-15",
+      notes: "經典配方，甜潤回甘，有明顯的煙香和蜜韻",
+      image: "/placeholder.svg",
+      flavorProfile: ["甘甜", "回甘", "煙香", "蜜韻"],
+      price: 280
+    },
+    {
+      id: 2,
+      name: "鐵觀音",
+      type: "烏龍茶",
+      origin: "福建安溪",
+      year: 2023,
+      rating: 4.2,
+      brewCount: 5,
+      dateAdded: "2024-02-20",
+      notes: "傳統工藝製作，香氣清幽，滋味醇厚",
+      image: "/placeholder.svg",
+      flavorProfile: ["花香", "清香", "甘醇"],
+      price: 150
+    },
+    {
+      id: 3,
+      name: "正山小種",
+      type: "紅茶",
+      origin: "福建武夷山",
+      year: 2023,
+      rating: 4.7,
+      brewCount: 12,
+      dateAdded: "2024-03-10",
+      notes: "獨特的煙熏味，配合蜜香，層次豐富",
+      image: "/placeholder.svg",
+      flavorProfile: ["煙熏", "蜜香", "醇厚"],
+      price: 200
+    },
+    {
+      id: 4,
+      name: "西湖龍井",
+      type: "綠茶",
+      origin: "浙江杭州",
+      year: 2024,
+      rating: 4.0,
+      brewCount: 3,
+      dateAdded: "2024-04-05",
+      notes: "扁平光滑，清香淡雅，口感鮮爽",
+      image: "/placeholder.svg",
+      flavorProfile: ["清香", "鮮爽", "淡雅"],
+      price: 320
+    },
+    {
+      id: 5,
+      name: "白毫銀針",
+      type: "白茶",
+      origin: "福建福鼎",
+      year: 2020,
+      rating: 4.8,
+      brewCount: 6,
+      dateAdded: "2024-05-12",
+      notes: "毫香明顯，湯色淺黃，滋味清淡甘甜",
+      image: "/placeholder.svg",
+      flavorProfile: ["毫香", "甘甜", "清淡"],
+      price: 450
+    },
+    {
+      id: 6,
+      name: "武夷岩茶",
+      type: "烏龍茶",
+      origin: "福建武夷山",
+      year: 2022,
+      rating: 4.6,
+      brewCount: 9,
+      dateAdded: "2024-06-01",
+      notes: "岩韻明顯，焙火適中，滋味醇厚",
+      image: "/placeholder.svg",
+      flavorProfile: ["岩韻", "焙火", "醇厚"],
+      price: 380
+    }
+  ];
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [showNewRecord, setShowNewRecord] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
-
-  const recentTeas = [
-    {
-      id: 1,
-      name: "大益7542",
-      type: "普洱生茶",
-      origin: "云南勐海",
-      year: "2018",
-      rating: 4.5,
-      brewCount: 8,
-      lastBrewed: "2024-06-14",
-      flavorProfile: ["甘甜", "回甘", "微苦"]
-    },
-    {
-      id: 2,
-      name: "铁观音",
-      type: "乌龙茶",
-      origin: "福建安溪",
-      year: "2023",
-      rating: 4.2,
-      brewCount: 5,
-      lastBrewed: "2024-06-13",
-      flavorProfile: ["花香", "清香", "甘醇"]
-    },
-    {
-      id: 3,
-      name: "正山小种",
-      type: "红茶",
-      origin: "福建武夷山",
-      year: "2023",
-      rating: 4.7,
-      brewCount: 12,
-      lastBrewed: "2024-06-12",
-      flavorProfile: ["烟熏", "蜜香", "醇厚"]
-    }
-  ];
+  const [recentTeas, setRecentTeas] = useState<RecentTea[]>(initialRecentTeas);
+  const [teaCollection, setTeaCollection] = useState<Tea[]>(initialTeaCollection);
 
   const stats = {
     totalTeas: 24,
     brewingSessions: 156,
     favoriteType: "普洱茶",
     averageRating: 4.3
+  };
+
+  const handleAddNewTea = (record: TeaRecord) => {
+    const newId = Date.now();
+    const newTea: Tea = {
+      id: newId,
+      name: record.name,
+      type: record.type,
+      origin: record.origin,
+      year: parseInt(record.year, 10) || new Date().getFullYear(),
+      rating: record.rating,
+      brewCount: 1,
+      dateAdded: new Date().toISOString().split('T')[0],
+      notes: record.notes,
+      image: "/placeholder.svg",
+      flavorProfile: record.flavorTags,
+      price: 0 // Not in form
+    };
+
+    const newRecentTea: RecentTea = {
+      id: newId,
+      name: record.name,
+      type: record.type,
+      origin: record.origin,
+      year: record.year || new Date().getFullYear().toString(),
+      rating: record.rating,
+      brewCount: 1,
+      lastBrewed: new Date().toISOString().split('T')[0],
+      flavorProfile: record.flavorTags,
+    };
+
+    setTeaCollection(prev => [newTea, ...prev]);
+    setRecentTeas(prev => [newRecentTea, ...prev].slice(0, 3));
   };
 
   return (
@@ -237,7 +360,7 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="collection">
-            <TeaCollection />
+            <TeaCollection teaCollection={teaCollection} />
           </TabsContent>
 
           <TabsContent value="brewing">
@@ -264,7 +387,10 @@ const Index = () => {
 
       {/* Tea Record Form Modal */}
       {showNewRecord && (
-        <TeaRecordForm onClose={() => setShowNewRecord(false)} />
+        <TeaRecordForm 
+          onClose={() => setShowNewRecord(false)} 
+          onSave={handleAddNewTea}
+        />
       )}
 
       {/* Onboarding Tour Modal */}

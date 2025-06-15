@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,14 +12,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { X, Camera, Thermometer, Clock, Scale, Droplets } from "lucide-react";
 import FlavorWheel from "./FlavorWheel";
 import { useToast } from "@/hooks/use-toast";
+import { TeaRecord } from "@/types/tea";
 
 interface TeaRecordFormProps {
   onClose: () => void;
+  onSave: (record: TeaRecord) => void;
 }
 
-const TeaRecordForm = ({ onClose }: TeaRecordFormProps) => {
+const TeaRecordForm = ({ onClose, onSave }: TeaRecordFormProps) => {
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<Omit<TeaRecord, 'flavorTags'> & { flavorTags: string[] }>({
     name: "",
     type: "",
     origin: "",
@@ -32,7 +33,7 @@ const TeaRecordForm = ({ onClose }: TeaRecordFormProps) => {
     rounds: 1,
     rating: 4,
     notes: "",
-    flavorTags: [] as string[],
+    flavorTags: [],
     brewingMethod: ""
   });
 
@@ -48,15 +49,16 @@ const TeaRecordForm = ({ onClose }: TeaRecordFormProps) => {
 
   const commonFlavors = [
     "甘甜", "回甘", "生津", "苦澀", "醇厚", "清香", "花香", "果香", 
-    "蜜香", "烟熏", "陈香", "木香", "草本", "礦物質", "海苔", "焙火"
+    "蜜香", "煙熏", "陳香", "木香", "草本", "礦物質", "海苔", "焙火"
   ];
 
   const handleFlavorToggle = (flavor: string) => {
-    setSelectedFlavors(prev => 
-      prev.includes(flavor) 
-        ? prev.filter(f => f !== flavor)
-        : [...prev, flavor]
-    );
+    setFormData(prev => {
+      const newFlavorTags = prev.flavorTags.includes(flavor)
+        ? prev.flavorTags.filter(f => f !== flavor)
+        : [...prev.flavorTags, flavor];
+      return { ...prev, flavorTags: newFlavorTags };
+    });
   };
 
   const handleSubmit = () => {
@@ -69,8 +71,7 @@ const TeaRecordForm = ({ onClose }: TeaRecordFormProps) => {
       return;
     }
 
-    // Here you would typically save the data
-    console.log("Tea record saved:", { ...formData, flavorTags: selectedFlavors });
+    onSave(formData);
     
     toast({
       title: "品飲記錄已保存",
@@ -88,6 +89,9 @@ const TeaRecordForm = ({ onClose }: TeaRecordFormProps) => {
             <Scale className="w-6 h-6 mr-2" />
             新增品飲記錄
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            填寫表單以新增一筆新的茶品品飲記錄。
+          </DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="basic" className="space-y-6">
@@ -347,9 +351,9 @@ const TeaRecordForm = ({ onClose }: TeaRecordFormProps) => {
                       {commonFlavors.map(flavor => (
                         <Badge
                           key={flavor}
-                          variant={selectedFlavors.includes(flavor) ? "default" : "outline"}
+                          variant={formData.flavorTags.includes(flavor) ? "default" : "outline"}
                           className={`cursor-pointer transition-colors ${
-                            selectedFlavors.includes(flavor)
+                            formData.flavorTags.includes(flavor)
                               ? "bg-amber-600 text-white hover:bg-amber-700"
                               : "border-amber-300 text-amber-700 hover:bg-amber-100"
                           }`}
@@ -376,7 +380,10 @@ const TeaRecordForm = ({ onClose }: TeaRecordFormProps) => {
               </div>
 
               <div>
-                <FlavorWheel selectedFlavors={selectedFlavors} onFlavorChange={setSelectedFlavors} />
+                <FlavorWheel 
+                  selectedFlavors={formData.flavorTags} 
+                  onFlavorChange={(flavors) => setFormData(prev => ({ ...prev, flavorTags: flavors }))} 
+                />
               </div>
             </div>
           </TabsContent>
