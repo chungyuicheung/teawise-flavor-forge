@@ -1,19 +1,20 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { Plus, Leaf, Clock, Thermometer, Scale, BookOpen, Users, BarChart3 } from "lucide-react";
+import { Plus, Leaf, Clock, Thermometer, Scale, BookOpen, Users, BarChart3, HelpCircle } from "lucide-react";
 import TeaRecordForm from "@/components/TeaRecordForm";
 import FlavorWheel from "@/components/FlavorWheel";
 import TeaCollection from "@/components/TeaCollection";
 import BrewingHistory from "@/components/BrewingHistory";
+import OnboardingTour from "@/components/OnboardingTour";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [showNewRecord, setShowNewRecord] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const recentTeas = [
     {
@@ -75,13 +76,23 @@ const Index = () => {
                 <p className="text-sm text-amber-600">茶品品飲筆記</p>
               </div>
             </div>
-            <Button 
-              onClick={() => setShowNewRecord(true)}
-              className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-lg"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              新增品飲記錄
-            </Button>
+            <div className="flex items-center space-x-3">
+              <Button 
+                variant="outline"
+                onClick={() => setShowOnboarding(true)}
+                className="border-amber-300 text-amber-700 hover:bg-amber-50"
+              >
+                <HelpCircle className="w-4 h-4 mr-2" />
+                新手引導
+              </Button>
+              <Button 
+                onClick={() => setShowNewRecord(true)}
+                className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-lg"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                新增品飲記錄
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -230,6 +241,11 @@ const Index = () => {
       {/* Tea Record Form Modal */}
       {showNewRecord && (
         <TeaRecordForm onClose={() => setShowNewRecord(false)} />
+      )}
+
+      {/* Onboarding Tour Modal */}
+      {showOnboarding && (
+        <OnboardingTour onClose={() => setShowOnboarding(false)} />
       )}
     </div>
   );
