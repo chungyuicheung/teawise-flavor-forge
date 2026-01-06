@@ -2,6 +2,8 @@
 
 A beautiful and intuitive tea tasting journal application built with modern web technologies. TeaWise helps tea enthusiasts track their tea collections, record tasting experiences, and discover flavor profiles.
 
+**Note: This application has been refactored from React to pure HTML/CSS/JavaScript. See teawise_refactored.html for the current implementation.**
+
 ## Features
 
 - 🍵 **Tea Collection Management** - Organize and track your tea collection

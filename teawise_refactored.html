@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeaWise - 茶品品飲筆記</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        amber: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            200: '#fde68a',
+                            300: '#fcd34d',
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
+                            800: '#92400e',
+                            900: '#78350f',
+                        },
+                        orange: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            200: '#fed7aa',
+                            300: '#fdba74',
+                            400: '#fb923c',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            800: '#9a3412',
+                            900: '#7c2d12',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .bg-gradient-to-br {
+            background: linear-gradient(to bottom right, #fef3c7, #ffedd5, #fefce8);
+        }
+        .bg-gradient-to-r {
+            background: linear-gradient(to right, #d97706, #c2410c);
+        }
+        .text-transparent {
+            background: linear-gradient(to right, #78350f, #9a3412);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .backdrop-blur-sm {
+            backdrop-filter: blur(4px);
+        }
+        .backdrop-blur-md {
+            backdrop-filter: blur(8px);
+        }
+        .tabs-container {
+            display: none;
+        }
+        .tabs-container.active {
+            display: block;
+        }
+        .tabs-container.md-grid {
+            display: block;
+        }
+        .mobile-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid #fbbf24;
+            display: flex;
+            justify-content: space-around;
+            padding: 0.5rem 0;
+            z-index: 100;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .nav-item.active {
+            background: #fef3c7;
+        }
+        .nav-item i {
+            font-size: 1.2rem;
+            margin-bottom: 0.2rem;
+        }
+        .nav-item span {
+            font-size: 0.7rem;
+        }
+        @media (min-width: 768px) {
+            .mobile-nav {
+                display: none;
+            }
+            .tabs-container {
+                display: block;
+            }
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 0.75rem;
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        @media (min-width: 640px) {
+            .modal-content {
+                max-width: 600px;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-sm border-b border-amber-200 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 md:py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2 md:space-x-3">
+                    <div class="w-9 h-9 md:w-10 md:h-10 bg-gradient-to-br from-amber-600 to-orange-600 rounded-full flex items-center justify-center shrink-0">
+                        <i class="fas fa-leaf text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold bg-gradient-to-r from-amber-800 to-orange-700 bg-clip-text text-transparent">
+                            TeaWise
+                        </h1>
+                        <p class="hidden sm:block text-xs md:text-sm text-amber-600">茶品品飲筆記</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <!-- Onboarding Button for mobile -->
+                    <button 
+                        id="onboarding-mobile"
+                        class="border border-amber-300 text-amber-700 hover:bg-amber-50 md:hidden rounded-full w-10 h-10 flex items-center justify-center"
+                    >
+                        <i class="fas fa-question-circle"></i>
+                        <span class="sr-only">新手引導</span>
+                    </button>
+                    <!-- Onboarding Button for desktop -->
+                    <button 
+                        id="onboarding-desktop"
+                        class="border border-amber-300 text-amber-700 hover:bg-amber-50 hidden md:flex items-center px-4 py-2 rounded-md"
+                    >
+                        <i class="fas fa-question-circle mr-2"></i>
+                        新手引導
+                    </button>
+                    
+                    <!-- New Record Button for mobile -->
+                    <button 
+                        id="new-record-mobile"
+                        class="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-lg md:hidden rounded-full w-10 h-10 flex items-center justify-center"
+                    >
+                        <i class="fas fa-plus"></i>
+                        <span class="sr-only">新增品飲記錄</span>
+                    </button>
+                    <!-- New Record Button for desktop -->
+                    <button 
+                        id="new-record-desktop"
+                        class="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-lg hidden md:flex items-center px-4 py-2 rounded-md"
+                    >
+                        <i class="fas fa-plus mr-2"></i>
+                        新增品飲記錄
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-8 pb-24 md:pb-8">
+        <div class="space-y-6">
+            <!-- Tabs for Desktop -->
+            <div class="hidden md:grid w-full grid-cols-4 bg-white/60 backdrop-blur-sm border-amber-200 rounded-lg p-2">
+                <button id="tab-dashboard" class="tab-btn data-[state=active]:bg-amber-100 flex flex-col items-center justify-center p-2 rounded-md">
+                    <i class="fas fa-chart-bar w-4 h-4 mb-1"></i>
+                    儀表板
+                </button>
+                <button id="tab-collection" class="tab-btn data-[state=active]:bg-amber-100 flex flex-col items-center justify-center p-2 rounded-md">
+                    <i class="fas fa-book w-4 h-4 mb-1"></i>
+                    茶品收藏
+                </button>
+                <button id="tab-brewing" class="tab-btn data-[state=active]:bg-amber-100 flex flex-col items-center justify-center p-2 rounded-md">
+                    <i class="fas fa-clock w-4 h-4 mb-1"></i>
+                    沖泡記錄
+                </button>
+                <button id="tab-community" class="tab-btn data-[state=active]:bg-amber-100 flex flex-col items-center justify-center p-2 rounded-md">
+                    <i class="fas fa-users w-4 h-4 mb-1"></i>
+                    茶友圈
+                </button>
+            </div>
+
+            <!-- Mobile Tab Selector -->
+            <div class="md:hidden">
+                <select id="mobile-tab-selector" class="w-full p-3 rounded-lg border border-amber-200 bg-white/70 backdrop-blur-sm">
+                    <option value="dashboard">儀表板</option>
+                    <option value="collection">茶品收藏</option>
+                    <option value="brewing">沖泡記錄</option>
+                    <option value="community">茶友圈</option>
+                </select>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div id="dashboard-tab" class="tabs-container active">
+                <!-- Stats Overview -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-white/70 backdrop-blur-sm border-amber-200 border rounded-lg p-4">
+                        <div class="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <h3 class="text-sm font-medium text-amber-800">茶品收藏</h3>
+                            <i class="fas fa-leaf text-amber-600"></i>
+                        </div>
+                        <div class="p-0 pt-2">
+                            <div class="text-2xl font-bold text-amber-900">24</div>
+                            <p class="text-xs text-amber-600">種不同茶品</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white/70 backdrop-blur-sm border-amber-200 border rounded-lg p-4">
+                        <div class="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <h3 class="text-sm font-medium text-amber-800">沖泡次數</h3>
+                            <i class="fas fa-clock text-amber-600"></i>
+                        </div>
+                        <div class="p-0 pt-2">
+                            <div class="text-2xl font-bold text-amber-900">156</div>
+                            <p class="text-xs text-amber-600">總沖泡記錄</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white/70 backdrop-blur-sm border-amber-200 border rounded-lg p-4">
+                        <div class="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <h3 class="text-sm font-medium text-amber-800">偏好茶類</h3>
+                            <i class="fas fa-thermometer-half text-amber-600"></i>
+                        </div>
+                        <div class="p-0 pt-2">
+                            <div class="text-lg font-bold text-amber-900">普洱茶</div>
+                            <p class="text-xs text-amber-600">最常品飲</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white/70 backdrop-blur-sm border-amber-200 border rounded-lg p-4">
+                        <div class="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <h3 class="text-sm font-medium text-amber-800">平均評分</h3>
+                            <i class="fas fa-balance-scale text-amber-600"></i>
+                        </div>
+                        <div class="p-0 pt-2">
+                            <div class="text-2xl font-bold text-amber-900">4.3</div>
+                            <p class="text-xs text-amber-600">滿分5分</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Teas -->
+                <div class="bg-white/70 backdrop-blur-sm border-amber-200 border rounded-lg p-4 md:p-6 mt-6">
+                    <div class="p-0 md:p-2">
+                        <h2 class="text-xl font-bold text-amber-800 mb-2">最近品飲</h2>
+                        <p class="text-sm text-amber-600 mb-4">您最近品飲的茶品記錄</p>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-start justify-between p-3 sm:p-4 bg-amber-50/50 rounded-lg border border-amber-100">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <h3 class="font-semibold text-amber-900">大益7542</h3>
+                                    <span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full">普洱生茶</span>
+                                </div>
+                                <div class="text-sm text-amber-700 space-y-2">
+                                    <p>雲南勐海 · 2018年</p>
+                                    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:text-sm">
+                                        <span>沖泡 8 次</span>
+                                        <span>最後品飲：2024-06-14</span>
+                                        <div class="flex items-center">
+                                            <span class="mr-1 sm:mr-2">評分：</span>
+                                            <div class="flex items-center text-amber-500">
+                                                ★★★★☆
+                                                <span class="ml-1 text-xs text-amber-700">(4.5)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-wrap gap-1 mt-2">
+                                    <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">甘甜</span>
+                                    <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">回甘</span>
+                                    <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">微苦</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start justify-between p-3 sm:p-4 bg-amber-50/50 rounded-lg border border-amber-100">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <h3 class="font-semibold text-amber-900">鐵觀音</h3>
+                                    <span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full">烏龍茶</span>
+                                </div>
+                                <div class="text-sm text-amber-700 space-y-2">
+                                    <p>福建安溪 · 2023年</p>
+                                    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:text-sm">
+                                        <span>沖泡 5 次</span>
+                                        <span>最後品飲：2024-06-13</span>
+                                        <div class="flex items-center">
+                                            <span class="mr-1 sm:mr-2">評分：</span>
+                                            <div class="flex items-center text-amber-500">
+                                                ★★★★☆
+                                                <span class="ml-1 text-xs text-amber-700">(4.2)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-wrap gap-1 mt-2">
+                                    <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">花香</span>
+                                    <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">清香</span>
+                                    <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">甘醇</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start justify-between p-3 sm:p-4 bg-amber-50/50 rounded-lg border border-amber-100">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <h3 class="font-semibold text-amber-900">正山小種</h3>
+                                    <span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full">紅茶</span>
+                                </div>
+                                <div class="text-sm text-amber-700 space-y-2">
+                                    <p>福建武夷山 · 2023年</p>
+                                    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:text-sm">
+                                        <span>沖泡 12 次</span>
+                                        <span>最後品飲：2024-06-12</span>
+                                        <div class="flex items-center">
+                                            <span class="mr-1 sm:mr-2">評分：</span>
+                                            <div class="flex items-center text-amber-500">
+                                                ★★★★★
+                                                <span class="ml-1 text-xs text-amber-700">(4.7)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-wrap gap-1 mt-2">
+                                    <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">煙熏</span>
+                                    <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">蜜香</span>
+                                    <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">醇厚</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Collection Tab -->
+            <div id="collection-tab" class="tabs-container">
+                <div class="bg-white/70 backdrop-blur-sm border-amber-200 border rounded-lg p-4 md:p-6">
+                    <div class="p-0 md:p-2">
+                        <h2 class="text-xl font-bold text-amber-800 mb-2">茶品收藏</h2>
+                        <p class="text-sm text-amber-600 mb-4">您的茶品收藏清單</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="border border-amber-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-start space-x-4">
+                                <div class="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16" />
+                                <div class="flex-1">
+                                    <h3 class="font-bold text-amber-900">大益7542</h3>
+                                    <p class="text-sm text-amber-700">普洱生茶 · 雲南勐海</p>
+                                    <div class="flex items-center mt-1">
+                                        <span class="text-amber-500 mr-1">★★★★☆</span>
+                                        <span class="text-xs text-amber-700">(4.5)</span>
+                                    </div>
+                                    <p class="text-xs text-amber-600 mt-2">經典配方，甜潤回甘，有明顯的煙香和蜜韻</p>
+                                    <div class="flex flex-wrap gap-1 mt-2">
+                                        <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">甘甜</span>
+                                        <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">回甘</span>
+                                        <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">煙香</span>
+                                        <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">蜜韻</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="border border-amber-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-start space-x-4">
+                                <div class="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16" />
+                                <div class="flex-1">
+                                    <h3 class="font-bold text-amber-900">鐵觀音</h3>
+                                    <p class="text-sm text-amber-700">烏龍茶 · 福建安溪</p>
+                                    <div class="flex items-center mt-1">
+                                        <span class="text-amber-500 mr-1">★★★★☆</span>
+                                        <span class="text-xs text-amber-700">(4.2)</span>
+                                    </div>
+                                    <p class="text-xs text-amber-600 mt-2">傳統工藝製作，香氣清幽，滋味醇厚</p>
+                                    <div class="flex flex-wrap gap-1 mt-2">
+                                        <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">花香</span>
+                                        <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">清香</span>
+                                        <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">甘醇</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="border border-amber-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-start space-x-4">
+                                <div class="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16" />
+                                <div class="flex-1">
+                                    <h3 class="font-bold text-amber-900">正山小種</h3>
+                                    <p class="text-sm text-amber-700">紅茶 · 福建武夷山</p>
+                                    <div class="flex items-center mt-1">
+                                        <span class="text-amber-500 mr-1">★★★★★</span>
+                                        <span class="text-xs text-amber-700">(4.7)</span>
+                                    </div>
+                                    <p class="text-xs text-amber-600 mt-2">獨特的煙熏味，配合蜜香，層次豐富</p>
+                                    <div class="flex flex-wrap gap-1 mt-2">
+                                        <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">煙熏</span>
+                                        <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">蜜香</span>
+                                        <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">醇厚</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="border border-amber-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-start space-x-4">
+                                <div class="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16" />
+                                <div class="flex-1">
+                                    <h3 class="font-bold text-amber-900">西湖龍井</h3>
+                                    <p class="text-sm text-amber-700">綠茶 · 浙江杭州</p>
+                                    <div class="flex items-center mt-1">
+                                        <span class="text-amber-500 mr-1">★★★★☆</span>
+                                        <span class="text-xs text-amber-700">(4.0)</span>
+                                    </div>
+                                    <p class="text-xs text-amber-600 mt-2">扁平光滑，清香淡雅，口感鮮爽</p>
+                                    <div class="flex flex-wrap gap-1 mt-2">
+                                        <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">清香</span>
+                                        <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">鮮爽</span>
+                                        <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">淡雅</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="border border-amber-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-start space-x-4">
+                                <div class="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16" />
+                                <div class="flex-1">
+                                    <h3 class="font-bold text-amber-900">白毫銀針</h3>
+                                    <p class="text-sm text-amber-700">白茶 · 福建福鼎</p>
+                                    <div class="flex items-center mt-1">
+                                        <span class="text-amber-500 mr-1">★★★★★</span>
+                                        <span class="text-xs text-amber-700">(4.8)</span>
+                                    </div>
+                                    <p class="text-xs text-amber-600 mt-2">毫香明顯，湯色淺黃，滋味清淡甘甜</p>
+                                    <div class="flex flex-wrap gap-1 mt-2">
+                                        <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">毫香</span>
+                                        <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">甘甜</span>
+                                        <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">清淡</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="border border-amber-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-start space-x-4">
+                                <div class="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16" />
+                                <div class="flex-1">
+                                    <h3 class="font-bold text-amber-900">武夷岩茶</h3>
+                                    <p class="text-sm text-amber-700">烏龍茶 · 福建武夷山</p>
+                                    <div class="flex items-center mt-1">
+                                        <span class="text-amber-500 mr-1">★★★★★</span>
+                                        <span class="text-xs text-amber-700">(4.6)</span>
+                                    </div>
+                                    <p class="text-xs text-amber-600 mt-2">岩韻明顯，焙火適中，滋味醇厚</p>
+                                    <div class="flex flex-wrap gap-1 mt-2">
+                                        <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">岩韻</span>
+                                        <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">焙火</span>
+                                        <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">醇厚</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Brewing Tab -->
+            <div id="brewing-tab" class="tabs-container">
+                <div class="bg-white/70 backdrop-blur-sm border-amber-200 border rounded-lg p-4 md:p-6">
+                    <div class="p-0 md:p-2">
+                        <h2 class="text-xl font-bold text-amber-800 mb-2">沖泡記錄</h2>
+                        <p class="text-sm text-amber-600 mb-4">您的茶品沖泡記錄</p>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-amber-50/50 rounded-lg border border-amber-100">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="font-semibold text-amber-900">大益7542</h3>
+                                    <p class="text-sm text-amber-700">普洱生茶 · 2024-06-14</p>
+                                </div>
+                                <div class="text-amber-500">★★★★☆</div>
+                            </div>
+                            <p class="text-sm text-amber-600 mt-2">第8次沖泡，水溫95°C，第一泡30秒，回甘明顯，甜潤順滑</p>
+                            <div class="flex flex-wrap gap-1 mt-2">
+                                <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">甘甜</span>
+                                <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">回甘</span>
+                                <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">順滑</span>
+                            </div>
+                        </div>
+                        
+                        <div class="p-4 bg-amber-50/50 rounded-lg border border-amber-100">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="font-semibold text-amber-900">鐵觀音</h3>
+                                    <p class="text-sm text-amber-700">烏龍茶 · 2024-06-13</p>
+                                </div>
+                                <div class="text-amber-500">★★★★☆</div>
+                            </div>
+                            <p class="text-sm text-amber-600 mt-2">第5次沖泡，水溫100°C，第一泡45秒，花香濃郁，口感醇厚</p>
+                            <div class="flex flex-wrap gap-1 mt-2">
+                                <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">花香</span>
+                                <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">醇厚</span>
+                                <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">濃郁</span>
+                            </div>
+                        </div>
+                        
+                        <div class="p-4 bg-amber-50/50 rounded-lg border border-amber-100">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="font-semibold text-amber-900">正山小種</h3>
+                                    <p class="text-sm text-amber-700">紅茶 · 2024-06-12</p>
+                                </div>
+                                <div class="text-amber-500">★★★★★</div>
+                            </div>
+                            <p class="text-sm text-amber-600 mt-2">第12次沖泡，水溫90°C，第一泡60秒，煙熏蜜香，層次豐富</p>
+                            <div class="flex flex-wrap gap-1 mt-2">
+                                <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">煙熏</span>
+                                <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">蜜香</span>
+                                <span class="text-xs border border-amber-300 text-amber-700 px-2 py-1 rounded">醇厚</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Community Tab -->
+            <div id="community-tab" class="tabs-container">
+                <div class="bg-white/70 backdrop-blur-sm border-amber-200 border rounded-lg p-6">
+                    <div class="p-0 md:p-2">
+                        <h2 class="text-xl font-bold text-amber-800 mb-2">茶友圈</h2>
+                        <p class="text-sm text-amber-600 mb-4">與茶友分享品飲心得</p>
+                    </div>
+                    <div class="text-center py-12">
+                        <i class="fas fa-users text-amber-400 text-4xl mb-4"></i>
+                        <h3 class="text-lg font-semibold text-amber-800 mb-2">即將推出</h3>
+                        <p class="text-amber-600">茶友交流、盲測訓練、茶樣交換功能正在開發中</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tea Record Form Modal -->
+    <div id="tea-record-modal" class="modal">
+        <div class="modal-content w-full p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-amber-800">新增品飲記錄</h2>
+                <button id="close-tea-form" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="tea-record-form">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-amber-700 mb-1">茶品名稱</label>
+                        <input type="text" class="w-full p-3 border border-amber-200 rounded-lg bg-white/70" placeholder="輸入茶品名稱" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-amber-700 mb-1">茶類</label>
+                        <select class="w-full p-3 border border-amber-200 rounded-lg bg-white/70">
+                            <option>普洱茶</option>
+                            <option>烏龍茶</option>
+                            <option>紅茶</option>
+                            <option>綠茶</option>
+                            <option>白茶</option>
+                            <option>黃茶</option>
+                            <option>花茶</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-amber-700 mb-1">產地</label>
+                        <input type="text" class="w-full p-3 border border-amber-200 rounded-lg bg-white/70" placeholder="輸入產地" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-amber-700 mb-1">年份</label>
+                        <input type="text" class="w-full p-3 border border-amber-200 rounded-lg bg-white/70" placeholder="輸入年份">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-amber-700 mb-1">評分</label>
+                        <div class="flex space-x-1">
+                            <button type="button" class="star-btn text-2xl text-gray-300 hover:text-amber-400">★</button>
+                            <button type="button" class="star-btn text-2xl text-gray-300 hover:text-amber-400">★</button>
+                            <button type="button" class="star-btn text-2xl text-gray-300 hover:text-amber-400">★</button>
+                            <button type="button" class="star-btn text-2xl text-gray-300 hover:text-amber-400">★</button>
+                            <button type="button" class="star-btn text-2xl text-gray-300 hover:text-amber-400">★</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-amber-700 mb-1">風味標籤</label>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" class="flavor-tag-btn border border-amber-300 text-amber-700 px-3 py-1 rounded-full text-sm">甘甜</button>
+                            <button type="button" class="flavor-tag-btn border border-amber-300 text-amber-700 px-3 py-1 rounded-full text-sm">回甘</button>
+                            <button type="button" class="flavor-tag-btn border border-amber-300 text-amber-700 px-3 py-1 rounded-full text-sm">花香</button>
+                            <button type="button" class="flavor-tag-btn border border-amber-300 text-amber-700 px-3 py-1 rounded-full text-sm">果香</button>
+                            <button type="button" class="flavor-tag-btn border border-amber-300 text-amber-700 px-3 py-1 rounded-full text-sm">醇厚</button>
+                            <button type="button" class="flavor-tag-btn border border-amber-300 text-amber-700 px-3 py-1 rounded-full text-sm">順滑</button>
+                            <button type="button" class="flavor-tag-btn border border-amber-300 text-amber-700 px-3 py-1 rounded-full text-sm">清香</button>
+                            <button type="button" class="flavor-tag-btn border border-amber-300 text-amber-700 px-3 py-1 rounded-full text-sm">濃郁</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-amber-700 mb-1">品飲筆記</label>
+                        <textarea class="w-full p-3 border border-amber-200 rounded-lg bg-white/70" rows="4" placeholder="記錄您的品飲感受..."></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" id="cancel-tea-form" class="px-4 py-2 border border-amber-300 text-amber-700 rounded-lg hover:bg-amber-50">取消</button>
+                        <button type="submit" class="px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg hover:from-amber-700 hover:to-orange-700">新增記錄</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Onboarding Tour Modal -->
+    <div id="onboarding-modal" class="modal">
+        <div class="modal-content w-full p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-amber-800">新手引導</h2>
+                <button id="close-onboarding" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div class="p-4 bg-amber-50 rounded-lg border border-amber-100">
+                    <h3 class="font-semibold text-amber-800 mb-2">儀表板</h3>
+                    <p class="text-amber-700">查看您的茶品統計數據和最近品飲記錄，快速了解您的品茶習慣。</p>
+                </div>
+                <div class="p-4 bg-amber-50 rounded-lg border border-amber-100">
+                    <h3 class="font-semibold text-amber-800 mb-2">茶品收藏</h3>
+                    <p class="text-amber-700">管理您的茶品收藏，查看詳細信息，添加新茶品到您的收藏中。</p>
+                </div>
+                <div class="p-4 bg-amber-50 rounded-lg border border-amber-100">
+                    <h3 class="font-semibold text-amber-800 mb-2">沖泡記錄</h3>
+                    <p class="text-amber-700">記錄每次品茶的詳細信息，包括水溫、時間、口感評價等。</p>
+                </div>
+                <div class="p-4 bg-amber-50 rounded-lg border border-amber-100">
+                    <h3 class="font-semibold text-amber-800 mb-2">茶友圈</h3>
+                    <p class="text-amber-700">即將推出的社交功能，與其他茶友分享心得、交流經驗。</p>
+                </div>
+                <div class="flex justify-end pt-4">
+                    <button id="close-onboarding-final" class="px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg hover:from-amber-700 hover:to-orange-700">開始使用</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav">
+        <div class="nav-item active" data-tab="dashboard">
+            <i class="fas fa-chart-bar"></i>
+            <span>儀表板</span>
+        </div>
+        <div class="nav-item" data-tab="collection">
+            <i class="fas fa-book"></i>
+            <span>收藏</span>
+        </div>
+        <div class="nav-item" data-tab="brewing">
+            <i class="fas fa-clock"></i>
+            <span>記錄</span>
+        </div>
+        <div class="nav-item" data-tab="community">
+            <i class="fas fa-users"></i>
+            <span>茶友</span>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        document.querySelectorAll('.tab-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons and tabs
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('data-[state=active]:bg-amber-100');
+                });
+                document.querySelectorAll('.tabs-container').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                // Add active class to clicked button
+                button.classList.add('data-[state=active]:bg-amber-100');
+                
+                // Show corresponding tab
+                const tabId = button.id.replace('tab-', '') + '-tab';
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Mobile tab switching
+        document.getElementById('mobile-tab-selector').addEventListener('change', function() {
+            // Remove active class from all tabs
+            document.querySelectorAll('.tabs-container').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(this.value + '-tab').classList.add('active');
+        });
+
+        // Mobile navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                // Remove active class from all items
+                document.querySelectorAll('.nav-item').forEach(nav => {
+                    nav.classList.remove('active');
+                });
+                
+                // Add active class to clicked item
+                item.classList.add('active');
+                
+                // Show corresponding tab
+                const tabId = item.getAttribute('data-tab');
+                
+                // Remove active class from all desktop tabs
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('data-[state=active]:bg-amber-100');
+                });
+                
+                // Add active class to corresponding desktop tab
+                document.getElementById('tab-' + tabId).classList.add('data-[state=active]:bg-amber-100');
+                
+                // Remove active class from all content tabs
+                document.querySelectorAll('.tabs-container').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                // Show selected content tab
+                document.getElementById(tabId + '-tab').classList.add('active');
+            });
+        });
+
+        // Modal functionality
+        document.getElementById('new-record-mobile').addEventListener('click', () => {
+            document.getElementById('tea-record-modal').classList.add('active');
+        });
+        
+        document.getElementById('new-record-desktop').addEventListener('click', () => {
+            document.getElementById('tea-record-modal').classList.add('active');
+        });
+        
+        document.getElementById('close-tea-form').addEventListener('click', () => {
+            document.getElementById('tea-record-modal').classList.remove('active');
+        });
+        
+        document.getElementById('cancel-tea-form').addEventListener('click', () => {
+            document.getElementById('tea-record-modal').classList.remove('active');
+        });
+        
+        document.getElementById('onboarding-mobile').addEventListener('click', () => {
+            document.getElementById('onboarding-modal').classList.add('active');
+        });
+        
+        document.getElementById('onboarding-desktop').addEventListener('click', () => {
+            document.getElementById('onboarding-modal').classList.add('active');
+        });
+        
+        document.getElementById('close-onboarding').addEventListener('click', () => {
+            document.getElementById('onboarding-modal').classList.remove('active');
+        });
+        
+        document.getElementById('close-onboarding-final').addEventListener('click', () => {
+            document.getElementById('onboarding-modal').classList.remove('active');
+        });
+
+        // Star rating functionality
+        const starButtons = document.querySelectorAll('.star-btn');
+        starButtons.forEach((star, index) => {
+            star.addEventListener('click', () => {
+                // Reset all stars to empty
+                starButtons.forEach((s, i) => {
+                    s.textContent = '☆';
+                    s.style.color = '';
+                });
+                
+                // Fill stars up to current index
+                for (let i = 0; i <= index; i++) {
+                    starButtons[i].textContent = '★';
+                    starButtons[i].style.color = '#f59e0b';
+                }
+            });
+        });
+
+        // Flavor tag functionality
+        const flavorButtons = document.querySelectorAll('.flavor-tag-btn');
+        flavorButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                button.classList.toggle('bg-amber-100');
+                button.classList.toggle('text-amber-800');
+            });
+        });
+
+        // Form submission
+        document.getElementById('tea-record-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('品飲記錄已新增！');
+            document.getElementById('tea-record-modal').classList.remove('active');
+            // In a real implementation, you would process the form data here
+        });
+    </script>
+</body>
+</html>
