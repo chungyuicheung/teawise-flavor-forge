@@ -1,20 +1,21 @@
-# Vite React Shadcn TypeScript Starter
+# TeaWise - Tea Tasting Journal
 
-A modern React starter template with TypeScript, Tailwind CSS, and shadcn/ui components. This project is built with Vite for fast development and includes a comprehensive set of UI components and utilities.
+A beautiful and intuitive tea tasting journal application built with modern web technologies. TeaWise helps tea enthusiasts track their tea collections, record tasting experiences, and discover flavor profiles.
 
 ## Features
 
-- ⚡ **Vite** - Next generation frontend tooling for lightning fast builds
-- 🦄 **React 18** - Component-based UI library
-- 🧪 **TypeScript** - Type-safe development
-- 💨 **Tailwind CSS** - Utility-first CSS framework
-- ✨ **shadcn/ui** - Accessible and customizable UI components
-- 🔥 **React Router** - Declarative routing for React
-- 📊 **Recharts** - Charting library for data visualization
-- 🎨 **Lucide React** - Beautifully simple icons
-- 📅 **React Hook Form** - Performant forms with easy validation
-- 📅 **React Day Picker** - Flexible date picker component
-- 🤖 **ESLint + Prettier** - Code linting and formatting
+- 🍵 **Tea Collection Management** - Organize and track your tea collection
+- 📝 **Tasting Records** - Detailed records of your tea tasting experiences
+- 📊 **Statistics Dashboard** - Visualize your tea journey with charts and metrics
+- 🌸 **Flavor Wheel** - Interactive tool to identify and record flavor profiles
+- 🎨 **Beautiful UI** - Designed with Tailwind CSS and shadcn/ui components
+- 📱 **Responsive Design** - Works seamlessly on desktop and mobile devices
+- ⚡ **Fast Performance** - Built with Vite for lightning-fast development and builds
+
+## GitHub Pages Deployment
+
+This application is deployed on GitHub Pages. You can view the live application at: 
+[https://your-username.github.io/repository-name](https://your-username.github.io/repository-name)
 
 ## Getting Started
 
@@ -77,6 +78,15 @@ src/
 - [Zod](https://zod.dev/) - Schema validation
 - [Lucide React](https://lucide.dev/) - Icon library
 - [Recharts](https://recharts.org/) - Charting library
+
+## GitHub Pages Deployment
+
+This project is configured for deployment to GitHub Pages. The deployment workflow is defined in `.github/workflows/deploy.yml` and will automatically deploy the application when changes are pushed to the main branch.
+
+To set up GitHub Pages for your fork:
+1. Enable GitHub Pages in your repository settings (Settings → Pages → Source: GitHub Actions)
+2. Update the `homepage` URL in the README to match your repository name
+3. Push changes to the main branch to trigger the deployment
 
 ## Contributing
 
